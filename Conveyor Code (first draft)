@@ -1,0 +1,80 @@
+
+//PIN VARIABLES
+//the motor will be controlled by the motor A pins on the motor driver
+const int AIN1 = 13;           //control pin 1 on the motor driver for the right motor
+const int AIN2 = 12;            //control pin 2 on the motor driver for the right motor
+const int PWMA = 11;            //speed control pin on the motor driver for the right motor
+const int PWMB = 10;           //speed control pin on the motor driver for the left motor
+const int BIN2 = 9;           //control pin 2 on the motor driver for the left motor
+const int BIN1 = 8;           //control pin 1 on the motor driver for the left motor
+int switchPin = 7;             //switch to turn the robot on and off
+
+//VARIABLES
+int motorSpeed = 75;       //starting speed for the motor
+int motorSpeed2 = -75;
+void setup() {
+  pinMode(switchPin, INPUT_PULLUP);   //set this as a pullup to sense whether the switch is flipped
+
+  //set the motor control pins as outputs
+  pinMode(AIN1, OUTPUT);
+  pinMode(AIN2, OUTPUT);
+  pinMode(PWMA, OUTPUT);
+  pinMode(PWMB, OUTPUT);
+  pinMode(BIN2, OUTPUT);
+  pinMode(BIN2, OUTPUT);
+
+  Serial.begin(9600);                       //begin serial communication with the computer
+
+  //Serial.println("Enter motor speed (0-255)... ");    //Prompt to get input in the serial monitor.
+}
+
+void loop() {
+
+  if (Serial.available() > 0) {         //if the user has entered something in the serial monitor
+    motorSpeed = Serial.parseInt();     //set the motor speed equal to the number in the serial message
+
+  }
+
+if (digitalRead(7) == LOW) {          //if the switch is on... 
+    spinMotor(motorSpeed);
+    delay(3000);                // we can modify delay times/motor speed depending on what works with the shelves (i was dumb and I forgot to get an extra motor from fyelic otherwise i'd test it rn)
+    spinMotor(0);
+    delay(3000);
+    spinMotor(motorSpeed2);
+    delay(3000);
+    
+  } else {                              //if the switch is off...
+    spinMotor(0);                   //turn the motor off
+  }
+
+
+}
+
+/********************************************************************************/
+void spinMotor(int motorSpeed)                       //function for driving the right motor
+{
+  if (motorSpeed > 0)                                 //if the motor should drive forward (positive speed)
+  {
+    digitalWrite(AIN1, HIGH);                         //set pin 1 to high
+    digitalWrite(AIN2, LOW);                          //set pin 2 to low
+    digitalWrite(BIN1, LOW);
+    digitalWrite(BIN2,HIGH);
+  }
+  else if (motorSpeed < 0)                            //if the motor should drive backward (negative speed)
+  {
+    digitalWrite(AIN1, LOW);                          //set pin 1 to low
+    digitalWrite(AIN2, HIGH);                         //set pin 2 to high
+    digitalWrite(BIN1, HIGH);
+    digitalWrite(BIN2,LOW);
+  }
+  else                                                //if the motor should stop
+  {
+    digitalWrite(AIN1, LOW);                          //set pin 1 to low
+    digitalWrite(AIN2, LOW);                          //set pin 2 to low
+    digitalWrite(BIN1, LOW);
+    digitalWrite(BIN2, LOW);
+  }
+  analogWrite(PWMA, abs(motorSpeed));                 //now that the motor direction is set, drive it at the entered speed
+  analogWrite(PWMB, abs(motorSpeed));
+}
+/********************************************************************************/
